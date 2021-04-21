@@ -26,6 +26,7 @@ byte pal[768];
 
 int rotation = 1;
 int zoom = -1;
+int do_shift = 1;
 
 #define SETPIX(x,y,c) *(framebuf + (dword)buf_width * (y) + (x)) = c
 #define GETPIX(x,y) *(framebuf + (dword)buf_width * (y) + (x))
@@ -44,13 +45,15 @@ draw_dweezil()
   /* shuffle image center deterministically */
   pos++;
   shift = 0;
-  for( i = 0; i < 4; i++ ) {
-    shift <<= 1;
-    shift |= (pos >> i) & 1;
-  }
+  if( do_shift ) {
+    for( i = 0; i < 4; i++ ) {
+      shift <<= 1;
+      shift |= (pos >> i) & 1;
+    }
 
-  /* inject some long-term variation */
-  shift = shift ^ (pos >> 4) & 0x0f;
+    /* inject some long-term variation */
+    shift = shift ^ (pos >> 4) & 0x0f;
+  }
 
   /* seed new random pixels in the center */
   for( y = -(PIECE_SIZE>>1); y <= (PIECE_SIZE>>1); y++ ) {
@@ -119,6 +122,9 @@ main()
       case 'r':
 	rotation++;
 	if( rotation > 1 ) rotation = -1;
+	break;
+      case 's':
+	do_shift = !do_shift;
 	break;
       case 'z':
 	zoom++;
