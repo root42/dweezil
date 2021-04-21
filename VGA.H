@@ -52,6 +52,7 @@ void set_mode_y();
 void set_text_mode();
 void set_mode( byte mode );
 void set_palette(byte *palette);
+void cycle_palette(byte *palette, int j);
 void setpix(word page, int x, int y, byte c);
 
 void wait_for_retrace();

@@ -104,7 +104,7 @@ int
 main()
 {
   char kc = 0;
-  int i, y;
+  int i, y, t = 0;
   const word buf_size = buf_width * buf_height;
 
   framebuf = farmalloc( buf_size );
@@ -142,6 +142,7 @@ main()
     }
     draw_dweezil();
     wait_for_retrace();
+    cycle_palette( fire_pal, t++ );
     for( y = PIECE_SIZE; y < (buf_height < 200 ? buf_height : 200); ++y ) {
       memcpy(
 	VGA + (SCREEN_WIDTH / 2) - (buf_width - PIECE_SIZE) / 2 + y * SCREEN_WIDTH,

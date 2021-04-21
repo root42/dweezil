@@ -130,6 +130,16 @@ void set_palette(byte *palette)
   }
 }
 
+void cycle_palette(byte *palette, int j)
+{
+  int i;
+
+  outp( PALETTE_INDEX, 0 );
+  for( i = 0; i < NUM_COLORS * 3; ++i ) {
+    outp( PALETTE_DATA, palette[ (i + j * 3) % (NUM_COLORS * 3) ] );
+  }
+}
+
 void blit2page( byte far *s[], word page, int x, int y, int w, int h )
 {
   int j;
