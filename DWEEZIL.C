@@ -10,12 +10,14 @@
 #include "vga.h"
 #include "pal.h"
 
+#define NO_KEY_DEBUG
+
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 200
 
 #define PIECE_SIZE 16
-#define NUM_PIECES_X 15
-#define NUM_PIECES_Y 15
+#define NUM_PIECES_X 11
+#define NUM_PIECES_Y 11
 
 const word buf_width = PIECE_SIZE * NUM_PIECES_X;
 const word buf_height = PIECE_SIZE * NUM_PIECES_Y;
@@ -53,6 +55,7 @@ draw_dweezil()
 
     /* inject some long-term variation */
     shift = shift ^ (pos >> 4) & 0x0f;
+    shift = random(16);
   }
 
   /* seed new random pixels in the center */
@@ -116,6 +119,9 @@ main()
   memset(framebuf, 0x00, buf_size);
   memset(data_chunks, 0x00, buf_size);
   while( kc != 0x1b ) {
+#ifdef KEY_DEBUG
+    kc = getch();
+#endif
     if( kbhit() ) {
       kc = getch();
       switch( kc ) {
@@ -136,12 +142,19 @@ main()
     }
     draw_dweezil();
     wait_for_retrace();
-    for( y = 0; y < (buf_height < 200 ? buf_height : 200); ++y ) {
+    for( y = PIECE_SIZE; y < (buf_height < 200 ? buf_height : 200); ++y ) {
       memcpy(
-	VGA + y * SCREEN_WIDTH,
-	framebuf + y * buf_width,
+	VGA + (SCREEN_WIDTH / 2) - (buf_width - PIECE_SIZE) / 2 + y * SCREEN_WIDTH,
+	framebuf + PIECE_SIZE + y * buf_width,
+	buf_width - PIECE_SIZE
+      );
+#ifdef KEY_DEBUG
+      memcpy(
+	VGA + buf_width + y * SCREEN_WIDTH,
+	data_chunks + y * buf_width,
 	buf_width
       );
+#endif
     }
   }
   set_text_mode();
