@@ -10,14 +10,12 @@
 #include "vga.h"
 #include "pal.h"
 
-#define NO_KEY_DEBUG
-
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 200
 
 #define PIECE_SIZE 16
-#define NUM_PIECES_X 11
-#define NUM_PIECES_Y 11
+#define NUM_PIECES_X 13
+#define NUM_PIECES_Y 13
 
 const word buf_width = PIECE_SIZE * NUM_PIECES_X;
 const word buf_height = PIECE_SIZE * NUM_PIECES_Y;
@@ -31,36 +29,26 @@ int zoom = -1;
 int do_shift = 1;
 
 #define SETPIX(x,y,c) *(framebuf + (dword)buf_width * (y) + (x)) = c
-#define GETPIX(x,y) *(framebuf + (dword)buf_width * (y) + (x))
 
 void
 draw_dweezil()
 {
   int x, y, i;
   byte color;
-  static int pos = 0;
   int xs, ys, xd, yd, s;
   int w = buf_width;
   int h = buf_height;
   byte shift;
 
-  /* shuffle image center deterministically */
-  pos++;
+  /* shuffle image center */
   shift = 0;
   if( do_shift ) {
-    for( i = 0; i < 4; i++ ) {
-      shift <<= 1;
-      shift |= (pos >> i) & 1;
-    }
-
-    /* inject some long-term variation */
-    shift = shift ^ (pos >> 4) & 0x0f;
     shift = random(16);
   }
 
   /* seed new random pixels in the center */
-  for( y = -(PIECE_SIZE>>1); y <= (PIECE_SIZE>>1); y++ ) {
-    for( x = -(PIECE_SIZE>>1); x <= (PIECE_SIZE>>1); x++) {
+  for( y = 0; y <= (PIECE_SIZE>>1); y++ ) {
+    for( x = 0; x <= (PIECE_SIZE>>1); x++) {
       /* color = (color + 1) % 256; */
       color = random(256);
       SETPIX( w/2 + x, h/2 + y, color );
@@ -119,9 +107,6 @@ main()
   memset(framebuf, 0x00, buf_size);
   memset(data_chunks, 0x00, buf_size);
   while( kc != 0x1b ) {
-#ifdef KEY_DEBUG
-    kc = getch();
-#endif
     if( kbhit() ) {
       kc = getch();
       switch( kc ) {
@@ -142,19 +127,12 @@ main()
     }
     draw_dweezil();
     wait_for_retrace();
-    for( y = PIECE_SIZE; y < (buf_height < 200 ? buf_height : 200); ++y ) {
+    for( y = PIECE_SIZE/2; y < (buf_height < 200-PIECE_SIZE/2 ? buf_height : 200-PIECE_SIZE/2); ++y ) {
       memcpy(
 	VGA + (SCREEN_WIDTH / 2) - (buf_width - PIECE_SIZE) / 2 + y * SCREEN_WIDTH,
 	framebuf + PIECE_SIZE + y * buf_width,
 	buf_width - PIECE_SIZE
       );
-#ifdef KEY_DEBUG
-      memcpy(
-	VGA + buf_width + y * SCREEN_WIDTH,
-	data_chunks + y * buf_width,
-	buf_width
-      );
-#endif
     }
   }
   set_text_mode();
