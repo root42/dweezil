@@ -71,21 +71,11 @@ draw_dweezil()
     }
   }
 
-  for( y = 0; y < NUM_PIECES_Y; y++ ) {
-    for( x = 0; x < NUM_PIECES_X; x++ ) {
-      xs = x * PIECE_SIZE;
-      ys = y * PIECE_SIZE;
-      xd = x * PIECE_SIZE + shift;
-      yd = y * PIECE_SIZE + shift;
-      memcpy_rect(
-	framebuf, data_chunks,
-	buf_width, buf_height,
-	xs, ys,
-	xd, yd,
-	PIECE_SIZE, PIECE_SIZE
-      );
-    }
-  }
+  memcpy(
+    framebuf + shift + shift * buf_width,
+    data_chunks,
+    buf_width*buf_height
+  );
 }
 
 int
