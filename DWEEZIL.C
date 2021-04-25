@@ -47,9 +47,8 @@ draw_dweezil()
   }
 
   /* seed new random pixels in the center */
-  for( y = 0; y <= (PIECE_SIZE>>1); y++ ) {
-    for( x = 0; x <= (PIECE_SIZE>>1); x++) {
-      /* color = (color + 1) % 256; */
+  for( y = 0; y <= PIECE_SIZE/2; y++ ) {
+    for( x = 0; x <= PIECE_SIZE/2; x++) {
       color = random(256);
       SETPIX( w/2 + x, h/2 + y, color );
     }
@@ -91,11 +90,12 @@ main()
     printf("not enough memory\n");
     return 1;
   }
+  memset(framebuf, 0x00, buf_size);
+  memset(data_chunks, 0x00, buf_size);
 
   set_graphics_mode();
   set_palette( fire_pal );
-  memset(framebuf, 0x00, buf_size);
-  memset(data_chunks, 0x00, buf_size);
+
   while( kc != 0x1b ) {
     if( kbhit() ) {
       kc = getch();
